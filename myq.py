@@ -46,8 +46,8 @@ BRAND_MAPPINGS = {
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Set up the MyQ garage door."""
 
-    name = config.get(CONF_NAME) if \
-        CONF_NAME else DEFAULT_NAME
+    # name = config.get(CONF_NAME) if \
+        # CONF_NAME else DEFAULT_NAME
 
     username = config.get(CONF_USERNAME)
     password = config.get(CONF_PASSWORD)
@@ -66,7 +66,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 
     myq = MyQAPI(username, password, brand, logger)
 
-    add_devices(MyQCoverDevice(myq, door, name) for door
+    add_devices(MyQCoverDevice(myq, door) for door
                 in myq.get_garage_doors())
 
 
@@ -113,9 +113,10 @@ class MyQAPI(object):
                 host_uri=self.brand[HOST_URI],
                 login_endpoint=self.LOGIN_ENDPOINT),
             params=params,
-            headers={
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
-    })
+			headers={
+			'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+			}
+		)
         auth = login.json()
         self.security_token = auth['SecurityToken']
         self._logger.debug('Logged in to MyQ API')
@@ -137,9 +138,10 @@ class MyQAPI(object):
                 host_uri=self.brand[HOST_URI],
                 device_list_endpoint=self.DEVICE_LIST_ENDPOINT),
             params=params,
-            headers={
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
-    })
+			headers={
+			'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+			}
+		)
 
         devices = devices.json()['Devices']
 
@@ -154,13 +156,14 @@ class MyQAPI(object):
 
         for device in devices:
             if device['MyQDeviceTypeName'] == 'GarageDoorOpener':
-                 garage_doors.append(device['DeviceId'])
-# This looks like it expects a generic garage door operer name
-#                for attribute in device['Attributes']:
-#                    if attribute['AttributeDisplayName'] == 'desc' and \
-#                            attribute['Value'] == 'Garage Door Opener':
-#                        garage_doors.append(device['DeviceId'])
-
+                dev = {}
+                for attribute in device['Attributes']:
+                   if attribute['AttributeDisplayName'] == 'desc':
+                        dev['deviceid'] = device['DeviceId']
+                        dev['name'] = attribute['Value']
+                        garage_doors.append(dev)		
+	
+	
         return garage_doors
 
     def get_status(self, device_id):
@@ -178,9 +181,10 @@ class MyQAPI(object):
                 host_uri=self.brand[HOST_URI],
                 device_status_endpoint=self.DEVICE_STATUS_ENDPOINT),
             params=params,
-            headers={
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
-    })
+			headers={
+			'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+			}
+		)
 
         attval = device_status.json()['AttributeValue']
 
@@ -210,9 +214,10 @@ class MyQAPI(object):
                 host_uri=self.brand[HOST_URI],
                 device_set_endpoint=self.DEVICE_SET_ENDPOINT),
             data=payload,
-            headers={
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
-    })
+			headers={
+			'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+			}
+		)
 
         return device_action.status_code == 200
 
@@ -220,11 +225,11 @@ class MyQAPI(object):
 class MyQCoverDevice(CoverDevice):
     """Representation of a MyQ cover."""
 
-    def __init__(self, myq, device_id, name):
+    def __init__(self, myq, device):
         """Initialize with API object, device id, and name."""
         self.myq = myq
-        self.device_id = device_id
-        self._name = name
+        self.device_id = device['deviceid']
+        self._name = device['name']
 
     @property
     def should_poll(self):
