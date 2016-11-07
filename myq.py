@@ -230,7 +230,7 @@ class MyQCoverDevice(CoverDevice):
         self.myq = myq
         self.device_id = device['deviceid']
         self._name = device['name']
-	self._status = None
+        self._status = None
 
     @property
     def should_poll(self):
