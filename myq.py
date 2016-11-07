@@ -230,6 +230,7 @@ class MyQCoverDevice(CoverDevice):
         self.myq = myq
         self.device_id = device['deviceid']
         self._name = device['name']
+	self._status = None
 
     @property
     def should_poll(self):
@@ -244,8 +245,7 @@ class MyQCoverDevice(CoverDevice):
     @property
     def is_closed(self):
         """Return True if cover is closed, else False."""
-        status = self.myq.get_status(self.device_id)
-        return status == STATE_CLOSED
+        return self._status == STATE_CLOSED
 
     @property
     def current_cover_position(self):
@@ -259,3 +259,6 @@ class MyQCoverDevice(CoverDevice):
     def open_cover(self):
         """Issue open command to cover."""
         self.myq.open_device(self.device_id)
+
+    def update(self):
+        self._status = self.myq.get_status(self.device_id)
