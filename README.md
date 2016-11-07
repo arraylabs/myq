@@ -13,5 +13,5 @@ cover:
     name: Garage Door
     username: email@email.com
     password: password
-    brand: chamberlain
+    brand: chamberlain //liftmaster,chamberlain,craftmaster
 ```
