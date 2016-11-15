@@ -21,6 +21,7 @@ CHAMBERLAIN = 'chamberlain'
 CRAFTMASTER = 'craftmaster'
 
 SUPPORTED_BRANDS = [LIFTMASTER, CHAMBERLAIN, CRAFTMASTER]
+SUPPORTED_DEVICE_TYPE_NAMES = ['GarageDoorOpener', 'Garage Door Opener WGDO']
 
 DEFAULT_BRAND = CHAMBERLAIN
 DEFAULT_NAME = "MyQ"
@@ -155,7 +156,7 @@ class MyQAPI(object):
         garage_doors = []
 
         for device in devices:
-            if device['MyQDeviceTypeName'] == 'GarageDoorOpener':
+            if device['MyQDeviceTypeName'] in SUPPORTED_DEVICE_TYPE_NAMES:
                 dev = {}
                 for attribute in device['Attributes']:
                    if attribute['AttributeDisplayName'] == 'desc':
