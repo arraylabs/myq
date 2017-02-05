@@ -12,7 +12,6 @@ In your configuration.yaml file use an entry similar to:
 ```
 cover:
   - platform: myq
-    name: Garage Door
     username: email@email.com
     password: password
     brand: chamberlain //liftmaster,chamberlain,craftmaster
