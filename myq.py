@@ -1,8 +1,8 @@
 """
 Support for MyQ garage doors.
 
-For more details about this platform, please refer to the documentation at
-https://home-assistant.io/components/cover.myq/
+For more details about this platform, please refer to the forum at
+hhttps://community.home-assistant.io/t/myq-componenet-issues/1860/195
 """
 
 import logging
@@ -10,7 +10,6 @@ import requests
 
 from homeassistant.components.cover import CoverDevice
 from homeassistant.const import CONF_USERNAME, CONF_PASSWORD, CONF_NAME, STATE_OPEN, STATE_CLOSED
-
 
 DEPENDENCIES = []
 
@@ -47,9 +46,6 @@ BRAND_MAPPINGS = {
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Set up the MyQ garage door."""
 
-    # name = config.get(CONF_NAME) if \
-        # CONF_NAME else DEFAULT_NAME
-
     username = config.get(CONF_USERNAME)
     password = config.get(CONF_PASSWORD)
 
@@ -75,10 +71,10 @@ class MyQAPI(object):
     """Class for interacting with the MyQ iOS App API."""
 
     LOCALE = "en"
-    LOGIN_ENDPOINT = "Membership/ValidateUserWithCulture"
-    DEVICE_LIST_ENDPOINT = "api/UserDeviceDetails"
-    DEVICE_SET_ENDPOINT = "Device/setDeviceAttribute"
-    DEVICE_STATUS_ENDPOINT = "/Device/getDeviceAttribute"
+    LOGIN_ENDPOINT = "api/user/validatewithculture"
+    DEVICE_LIST_ENDPOINT = "api/v4/userdevicedetails/get"
+    DEVICE_SET_ENDPOINT = "api/v4/DeviceAttribute/PutDeviceAttribute"
+    DEVICE_STATUS_ENDPOINT = "api/v4/userdevicedetails/get"
 
     DOOR_STATE = {
         '1': STATE_OPEN, #'open',
@@ -113,9 +109,9 @@ class MyQAPI(object):
             'https://{host_uri}/{login_endpoint}'.format(
                 host_uri=self.brand[HOST_URI],
                 login_endpoint=self.LOGIN_ENDPOINT),
-            params=params,
+            	params=params,
 			headers={
-			'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+				'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
 			}
 		)
         auth = login.json()
@@ -138,11 +134,11 @@ class MyQAPI(object):
             'https://{host_uri}/{device_list_endpoint}'.format(
                 host_uri=self.brand[HOST_URI],
                 device_list_endpoint=self.DEVICE_LIST_ENDPOINT),
-            params=params,
-			headers={
+            	params=params,
+		headers={
 			'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
-			}
-		)
+		}
+	)
 
         devices = devices.json()['Devices']
 
@@ -160,36 +156,28 @@ class MyQAPI(object):
                 dev = {}
                 for attribute in device['Attributes']:
                    if attribute['AttributeDisplayName'] == 'desc':
-                        dev['deviceid'] = device['DeviceId']
+                        dev['deviceid'] = device['MyQDeviceId']
                         dev['name'] = attribute['Value']
                         garage_doors.append(dev)		
 	
 	
         return garage_doors
-
+        
     def get_status(self, device_id):
-        """Get device status."""
+        """List only MyQ garage door devices."""
 
-        params = {
-            'appId': self.brand[APP_ID],
-            'securityToken': self.security_token,
-            'devId': device_id,
-            'name': 'doorstate',
-        }
+        devices = self.get_devices()
 
-        device_status = requests.get(
-            'https://{host_uri}/{device_status_endpoint}'.format(
-                host_uri=self.brand[HOST_URI],
-                device_status_endpoint=self.DEVICE_STATUS_ENDPOINT),
-            params=params,
-			headers={
-			'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
-			}
-		)
+        garage_doors = []
 
-        attval = device_status.json()['AttributeValue']
-
-        garage_state = self.DOOR_STATE[attval]
+        for device in devices:
+            if device['MyQDeviceTypeName'] in SUPPORTED_DEVICE_TYPE_NAMES:
+                dev = {}
+                for attribute in device['Attributes']:
+                   if attribute['AttributeDisplayName'] == 'doorstate':
+                        garage_state = attribute['Value']		
+	
+        garage_state = self.DOOR_STATE[garage_state]
         return garage_state
 
     def close_device(self, device_id):
@@ -205,8 +193,8 @@ class MyQAPI(object):
         """Set device state."""
         payload = {
             'AttributeName': 'desireddoorstate',
-            'DeviceId': device_id,
-            'ApplicationId': self.brand[APP_ID],
+            'MyQDeviceId': device_id,
+            'ApplicationId': 'JVM/G9Nwih5BwKgNCjLxiFUQxQijAebyyg8QUHr7JOrP+tuPb8iHfRHKwTmDzHOu',
             'AttributeValue': state,
             'SecurityToken': self.security_token,
         }
@@ -215,10 +203,11 @@ class MyQAPI(object):
                 host_uri=self.brand[HOST_URI],
                 device_set_endpoint=self.DEVICE_SET_ENDPOINT),
             data=payload,
-			headers={
-			'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
-			}
-		)
+            headers={
+              'MyQApplicationId': 'JVM/G9Nwih5BwKgNCjLxiFUQxQijAebyyg8QUHr7JOrP+tuPb8iHfRHKwTmDzHOu',
+              'SecurityToken': self.security_token
+            }
+        )
 
         return device_action.status_code == 200
 
