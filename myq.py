@@ -107,7 +107,8 @@ class MyQAPI(object):
                 login_endpoint=self.LOGIN_ENDPOINT),
                 json=params,
                 headers={
-                    'MyQApplicationId': 'JVM/G9Nwih5BwKgNCjLxiFUQxQijAebyyg8QUHr7JOrP+tuPb8iHfRHKwTmDzHOu'
+                    'MyQApplicationId': 'JVM/G9Nwih5BwKgNCjLxiFUQxQijAebyyg8QUHr7JOrP+tuPb8iHfRHKwTmDzHOu',
+                    'User-Agent': 'Chamberlain/3773 (iPhone; iOS 10.0.1; Scale/2.00)'
                 }
         )
         
