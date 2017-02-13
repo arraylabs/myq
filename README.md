@@ -1,3 +1,5 @@
+### Beginning in Home Assistant 0.39 this will be an official component. Users using this custom component will need to remove it and also make a simple change to their config. Changing "brand" to "type". The documentation on the HA site will have a simple example.
+
 # myq
 ## MyQ custom component for Home Assistant.
 
