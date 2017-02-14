@@ -16,5 +16,5 @@ cover:
   - platform: myq
     username: email@email.com
     password: password
-    brand: chamberlain //liftmaster,chamberlain,craftmaster
+    brand: chamberlain //liftmaster,chamberlain,craftsman,merlin
 ```
