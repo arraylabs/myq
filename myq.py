@@ -13,6 +13,8 @@ DEPENDENCIES = []
 
 CONF_BRAND = 'brand'
 
+DEFAULT_NAME = 'myq'
+
 LIFTMASTER = 'liftmaster'
 CHAMBERLAIN = 'chamberlain'
 CRAFTSMAN = 'craftsman'
