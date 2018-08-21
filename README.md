@@ -1,10 +1,9 @@
-## MyQ custom component for Home Assistant.
+## MyQ component for Home Assistant.
 
-"""
 Platform for the MyQ cover component.
 For more details about this platform, please refer to the documentation
 https://www.home-assistant.io/components/cover.myq/
-"""
+
 
 Initial code provided by user MisterWil on the Home Assistant Forum. His initial code can be found at http://pastebin.com/qVszax1t.
 
